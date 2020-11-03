@@ -33,7 +33,14 @@ namespace Booking.Web
                     Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
+                .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            //services.Configure<IdentityOptions>(opt =>
+            //{
+            //    opt.Password.RequireDigit = false;
+
+            //});
 
             services.AddControllersWithViews();
 
