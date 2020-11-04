@@ -30,7 +30,6 @@ namespace Booking.Web.Controllers
             this.mapper = mapper;
         }
 
-        // GET: GymClasses
         [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
@@ -66,8 +65,6 @@ namespace Booking.Web.Controllers
 
         }
 
-
-        // GET: GymClasses/Details/5
         [RequiredIdRequiredModelFilter("id")]
         public async Task<IActionResult> Details(int? id)
         {
@@ -78,16 +75,12 @@ namespace Booking.Web.Controllers
             return View(gymClass);
         }
 
-        // GET: GymClasses/Create
         [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: GymClasses/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
@@ -103,27 +96,15 @@ namespace Booking.Web.Controllers
             return View(viewModel);
         }
 
-        // GET: GymClasses/Edit/5
         [Authorize(Roles = "Admin")]
+        [RequiredIdRequiredModelFilter("id")]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-           
             var model =  mapper.Map<EditGymClassViewModel>(await db.GymClasses.FindAsync(id));
 
-            if (model == null)
-            {
-                return NotFound();
-            }
             return View(model);
         }
 
-        // POST: GymClasses/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
@@ -158,27 +139,17 @@ namespace Booking.Web.Controllers
             return View(viewModel);
         }
 
-        // GET: GymClasses/Delete/5
         [Authorize(Roles = "Admin")]
+        [RequiredIdRequiredModelFilter("id")]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var gymClass = await db.GymClasses
                 .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (gymClass == null)
-            {
-                return NotFound();
-            }
-
+           
             return View(gymClass);
         }
 
-        // POST: GymClasses/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
