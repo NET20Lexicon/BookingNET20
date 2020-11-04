@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Booking.Core.ViewModels
 {
-   public class CreateGymClassViewModel
+    public class CreateGymClassViewModel
     {
         public string Name { get; set; }
         public DateTime StartDate { get; set; }
