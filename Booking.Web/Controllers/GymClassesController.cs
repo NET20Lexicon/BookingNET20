@@ -12,6 +12,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Booking.Core.ViewModels;
 using AutoMapper;
+using Booking.Web.Filters;
 
 namespace Booking.Web.Controllers
 {
@@ -67,21 +68,13 @@ namespace Booking.Web.Controllers
 
 
         // GET: GymClasses/Details/5
+        [RequiredIdRequiredModelFilter("id")]
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var gymClass = await db.GymClasses
                 .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (gymClass == null)
-            {
-                return NotFound();
-            }
-
+          
             return View(gymClass);
         }
 
@@ -131,40 +124,38 @@ namespace Booking.Web.Controllers
         // POST: GymClasses/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for 
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost, ActionName("Edit")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> EditNew(int? id)
+        public async Task<IActionResult> Edit(int id, EditGymClassViewModel viewModel)
         {
-            if (id is null)
+            if (id != viewModel.Id)
             {
                 return NotFound();
             }
 
-            var gymClass = await db.GymClasses.FindAsync(id);
             if (ModelState.IsValid)
             {
-                if (await TryUpdateModelAsync(gymClass, "", g => g.Name, g => g.Duration))
+                var gymClass = mapper.Map<GymClass>(viewModel);
+                try
                 {
-                    try
-                    {
-                        await db.SaveChangesAsync();
-                    }
-                    catch (DbUpdateConcurrencyException)
-                    {
-                        if (!GymClassExists((int)id))
-                        {
-                            return NotFound();
-                        }
-                        else
-                        {
-                            throw;
-                        }
-                    }
-                    return RedirectToAction(nameof(Index));
+                    db.Update(gymClass);
+                    await db.SaveChangesAsync();
                 }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!GymClassExists(viewModel.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
             }
-            return View(mapper.Map<EditGymClassViewModel>(gymClass));
+            return View(viewModel);
         }
 
         // GET: GymClasses/Delete/5
