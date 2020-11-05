@@ -1,0 +1,34 @@
+﻿@model GymClassesViewModel
+
+    <tr>
+        <td>
+            @if (User.IsInRole("Member"))
+            {
+                <a asp-action="Details" asp-route-id="@Model.Id">@Model.Name</a>
+            }
+            else
+            {
+                @Html.DisplayFor(modelItem => Model.Name)
+            }
+
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.StartDate)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.Duration)
+        </td>
+        @if (User.IsInRole("Member"))
+        {
+            <td>
+                <a asp-action="BookingToggle" asp-route-id="@Model.Id"
+                   class="btn @(Model.Attending ? "btn-danger" : "btn-success")">
+                    @(Model.Attending ? "cancel" : "book")
+                </a> |
+
+                <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
+                <a asp-action="Delete" asp-route-id="@Model.Id">Delete</a>
+            </td>
+        }
+    </tr>
+

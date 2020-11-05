@@ -152,6 +152,21 @@ namespace Booking.Web.Controllers
                 var gymClass = mapper.Map<GymClass>(viewModel);
                 db.Add(gymClass);
                 await db.SaveChangesAsync();
+
+                if (Request.IsAjax())
+                {
+                    var model = new GymClassesViewModel
+                    {
+                        Id = gymClass.Id,
+                        Name = gymClass.Name,
+                        StartDate = gymClass.StartDate,
+                        Duration = gymClass.Duration
+                    };
+
+                    return PartialView("GymClassPartial", model);
+                }
+
+
                 return RedirectToAction(nameof(Index));
             }
             return View(viewModel);
