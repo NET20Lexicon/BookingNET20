@@ -36,6 +36,17 @@ namespace Booking.Web.Controllers
             return View(await db.GymClasses.ToListAsync());
         }
 
+        public async Task<IActionResult> GetBookings()
+        {
+            var userId = userManager.GetUserId(User);
+            var model = db.ApplicationUserGymClasses
+                            .IgnoreQueryFilters()
+                            .Where(b => b.ApplicationUserId == userId)
+                            .Select(g => g.GymClass);
+
+            return View(nameof(Index), await model.ToListAsync());
+        }
+
         public async Task<IActionResult> BookingToggle(int? id)
         {
             if (id is null) return BadRequest();
