@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 using Booking.Core.ViewModels;
 using AutoMapper;
 using Booking.Web.Filters;
+using Booking.Web.Extensions;
 
 namespace Booking.Web.Controllers
 {
@@ -49,19 +50,10 @@ namespace Booking.Web.Controllers
 
             if (viewModel.ShowHistory)
             {
-                model.GymClasses = await db.ApplicationUserGymClasses
-                                    .IgnoreQueryFilters()
-                                    .Where(u => u.ApplicationUserId == userId)
-                                    .Select(g => new GymClassesViewModel
-                                    {
-                                        Id = g.GymClass.Id,
-                                        Name = g.GymClass.Name,
-                                        Duration = g.GymClass.Duration,
-                                        Attending = g.GymClass.AttendedMembers.Any(m => m.ApplicationUserId == userId)
-                                    })
-                                    .ToListAsync();
+                model.GymClasses =  mapper.Map<IEnumerable<GymClassesViewModel>>(await db.GymClasses
+                                            .IgnoreQueryFilters()
+                                            .Where(g => g.StartDate < DateTime.Now).ToListAsync());
             }
-
 
             else
             {
@@ -145,6 +137,8 @@ namespace Booking.Web.Controllers
         [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
+            if (Request.IsAjax())
+                return PartialView("CreatePartial");
             return View();
         }
 
