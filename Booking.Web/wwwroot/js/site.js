@@ -8,3 +8,11 @@ $(document).ready(function () {
         $('form').submit();
     })
 });
+
+function clearForm() {
+    $('.clear').val('');
+}
+
+function removeForm() {
+    $('#createForm').remove();
+}
