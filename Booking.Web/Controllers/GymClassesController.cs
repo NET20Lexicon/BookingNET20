@@ -14,6 +14,8 @@ using Booking.Core.ViewModels;
 using AutoMapper;
 using Booking.Web.Filters;
 using Booking.Web.Extensions;
+using Booking.Data.Repositories;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace Booking.Web.Controllers
 {
@@ -23,12 +25,15 @@ namespace Booking.Web.Controllers
         private readonly ApplicationDbContext db;
         private readonly UserManager<ApplicationUser> userManager;
         private readonly IMapper mapper;
+        private readonly GymClassRepository gymClassRepository;
+        private readonly ApplicationUserRepository applicationUserRepository;
 
         public GymClassesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IMapper mapper)
         {
             db = context;
             this.userManager = userManager;
             this.mapper = mapper;
+            gymClassRepository = new GymClassRepository(context);
         }
 
         [AllowAnonymous]
@@ -39,61 +44,57 @@ namespace Booking.Web.Controllers
 
             if (!User.Identity.IsAuthenticated)
             {
-                model.GymClasses = await db.GymClasses.Select(g => new GymClassesViewModel
-                {
-                    Id = g.Id,
-                    Name = g.Name,
-                    Duration = g.Duration,
-                })
-                .ToListAsync();
+                model.GymClasses =  mapper.Map<IEnumerable<GymClassesViewModel>>
+                                                     (await gymClassRepository.GetAsync());
+               
             }
 
             if (viewModel.ShowHistory)
             {
-                model.GymClasses =  mapper.Map<IEnumerable<GymClassesViewModel>>(await db.GymClasses
-                                            .IgnoreQueryFilters()
-                                            .Where(g => g.StartDate < DateTime.Now).ToListAsync());
+                model.GymClasses = mapper.Map<IEnumerable<GymClassesViewModel>>(await gymClassRepository.GetHistory());
             }
 
             else
             {
-                model.GymClasses = await db.GymClasses.Include(g => g.AttendedMembers)
+                var gymclasses = await gymClassRepository.GetWithBookings();
+                model.GymClasses = gymclasses
                                     .Select(g => new GymClassesViewModel
                                     {
                                         Id = g.Id,
                                         Name = g.Name,
                                         Duration = g.Duration,
                                         Attending = g.AttendedMembers.Any(m => m.ApplicationUserId == userId)
-                                    })
-                                    .ToListAsync();
+                                    });
+                                  
             }
 
             return View(model);
         }
 
+      
+
+
+
         public async Task<IActionResult> GetBookings()
         {
             var userId = userManager.GetUserId(User);
+           var gymClasses = await applicationUserRepository.GetBookings(userId);
             var model = new IndexViewModel
             {
-                GymClasses = await db.ApplicationUserGymClasses
-                                    .IgnoreQueryFilters()
-                                    .Where(u => u.ApplicationUserId == userId)
-                                    .Select(g => new GymClassesViewModel
-                                    {
-                                        Id = g.GymClass.Id,
-                                        Name = g.GymClass.Name,
-                                        Duration = g.GymClass.Duration,
-                                        Attending = g.GymClass.AttendedMembers.Any(m => m.ApplicationUserId == userId)
-                                    })
-                                    .ToListAsync()
+
+                GymClasses = gymClasses.Select(g => new GymClassesViewModel
+                {
+                    Id = g.GymClass.Id,
+                    Name = g.GymClass.Name,
+                    Duration = g.GymClass.Duration,
+                    Attending = g.GymClass.AttendedMembers.Any(m => m.ApplicationUserId == userId)
+                })
             };
 
             return View(nameof(Index), model);
         }
 
-
-
+      
 
         public async Task<IActionResult> BookingToggle(int? id)
         {
@@ -101,7 +102,7 @@ namespace Booking.Web.Controllers
 
             var userId = userManager.GetUserId(User);
 
-            var attending = db.ApplicationUserGymClasses.Find(userId, id);
+            var attending = applicationUserRepository.GetAttending(id, userId);
 
             if (attending is null)
             {
@@ -111,7 +112,7 @@ namespace Booking.Web.Controllers
                     GymClassId = (int)id
                 };
 
-                db.ApplicationUserGymClasses.Add(booking);
+                applicationUserRepository.Add(booking);
                 await db.SaveChangesAsync();
             }
             else
@@ -123,6 +124,8 @@ namespace Booking.Web.Controllers
             return RedirectToAction(nameof(Index));
 
         }
+
+       
 
         [RequiredIdRequiredModelFilter("id")]
         public async Task<IActionResult> Details(int? id)

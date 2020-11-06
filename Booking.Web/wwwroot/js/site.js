@@ -14,5 +14,5 @@ function clearForm() {
 }
 
 function removeForm() {
-    $('#createForm').remove();
+    $('#createajax').remove();
 }
