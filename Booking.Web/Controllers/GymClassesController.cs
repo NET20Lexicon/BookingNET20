@@ -34,6 +34,7 @@ namespace Booking.Web.Controllers
             this.userManager = userManager;
             this.mapper = mapper;
             gymClassRepository = new GymClassRepository(context);
+            applicationUserRepository = new ApplicationUserRepository(context);
         }
 
         [AllowAnonymous]
@@ -117,7 +118,7 @@ namespace Booking.Web.Controllers
             }
             else
             {
-                db.ApplicationUserGymClasses.Remove(attending);
+               applicationUserRepository.Remove(attending);
                 await db.SaveChangesAsync();
             }
 
@@ -130,12 +131,12 @@ namespace Booking.Web.Controllers
         [RequiredIdRequiredModelFilter("id")]
         public async Task<IActionResult> Details(int? id)
         {
-            var gymClass = await db.GymClasses
-                .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.Id == id);
+            GymClass gymClass = await gymClassRepository.GetAsync(id);
 
             return View(gymClass);
         }
+
+      
 
         [Authorize(Roles = "Admin")]
         public IActionResult Create()
@@ -153,7 +154,7 @@ namespace Booking.Web.Controllers
             if (ModelState.IsValid)
             {
                 var gymClass = mapper.Map<GymClass>(viewModel);
-                db.Add(gymClass);
+                gymClassRepository.Add(gymClass);
                 await db.SaveChangesAsync();
 
                 if (Request.IsAjax())
@@ -179,7 +180,7 @@ namespace Booking.Web.Controllers
         [RequiredIdRequiredModelFilter("id")]
         public async Task<IActionResult> Edit(int? id)
         {
-            var model = mapper.Map<EditGymClassViewModel>(await db.GymClasses.FindAsync(id));
+            var model = mapper.Map<EditGymClassViewModel>(await gymClassRepository.GetAsync(id));
 
             return View(model);
         }
@@ -199,7 +200,7 @@ namespace Booking.Web.Controllers
                 var gymClass = mapper.Map<GymClass>(viewModel);
                 try
                 {
-                    db.Update(gymClass);
+                    gymClassRepository.Update(gymClass);
                     await db.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -222,9 +223,7 @@ namespace Booking.Web.Controllers
         [RequiredIdRequiredModelFilter("id")]
         public async Task<IActionResult> Delete(int? id)
         {
-            var gymClass = await db.GymClasses
-                .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var gymClass = await gymClassRepository.GetAsync(id);
 
             return View(gymClass);
         }
@@ -234,15 +233,15 @@ namespace Booking.Web.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var gymClass = await db.GymClasses.FindAsync(id);
-            db.GymClasses.Remove(gymClass);
+            var gymClass = await gymClassRepository.GetAsync(id);
+            gymClassRepository.Remove(gymClass);
             await db.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool GymClassExists(int id)
         {
-            return db.GymClasses.Any(e => e.Id == id);
+            return gymClassRepository.Any(id);
         }
     }
 }

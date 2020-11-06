@@ -23,6 +23,12 @@ namespace Booking.Data.Repositories
             return await db.GymClasses.ToListAsync();
         }
 
+        public async Task<GymClass> GetAsync(int? id)
+        {
+            return await db.GymClasses
+                .FirstOrDefaultAsync(m => m.Id == id);
+        }
+
         public async Task<IEnumerable<GymClass>> GetHistory()
         {
             return await db.GymClasses
@@ -33,6 +39,25 @@ namespace Booking.Data.Repositories
         public async Task<IEnumerable<GymClass>> GetWithBookings()
         {
             return await db.GymClasses.Include(g => g.AttendedMembers).ToListAsync();
+        }
+
+        public void Add(GymClass gymClass)
+        {
+            db.Add(gymClass);
+        } 
+        public void Update(GymClass gymClass)
+        {
+            db.Update(gymClass);
+        } 
+        
+        public void Remove(GymClass gymClass)
+        {
+            db.Remove(gymClass);
+        }
+
+        public bool Any(int id)
+        {
+            return db.GymClasses.Any(g => g.Id == id);
         }
     }
 }

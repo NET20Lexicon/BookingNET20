@@ -36,6 +36,11 @@ namespace Booking.Data.Repositories
         public void Add(ApplicationUserGymClass attending)
         {
             db.Add(attending);
+        } 
+        
+        public void Remove(ApplicationUserGymClass attending)
+        {
+            db.Remove(attending);
         }
     }
 }
