@@ -16,6 +16,8 @@ using Booking.Core.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using AutoMapper;
+using Booking.Core.Repositories;
+using Booking.Data.Repositories;
 
 namespace Booking.Web
 {
@@ -52,6 +54,8 @@ namespace Booking.Web
             services.AddRazorPages();
 
             services.AddAutoMapper(typeof(MapperProfile));
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

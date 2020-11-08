@@ -16,25 +16,22 @@ using Booking.Web.Filters;
 using Booking.Web.Extensions;
 using Booking.Data.Repositories;
 using Microsoft.EntityFrameworkCore.Query;
+using Booking.Core.Repositories;
 
 namespace Booking.Web.Controllers
 {
 
     public class GymClassesController : Controller
     {
-        private readonly ApplicationDbContext db;
         private readonly UserManager<ApplicationUser> userManager;
         private readonly IMapper mapper;
-        private readonly GymClassRepository gymClassRepository;
-        private readonly ApplicationUserRepository applicationUserRepository;
+        private readonly IUnitOfWork unitOfWork;
 
-        public GymClassesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IMapper mapper)
+        public GymClassesController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper)
         {
-            db = context;
             this.userManager = userManager;
             this.mapper = mapper;
-            gymClassRepository = new GymClassRepository(context);
-            applicationUserRepository = new ApplicationUserRepository(context);
+            this.unitOfWork = unitOfWork;
         }
 
         [AllowAnonymous]
@@ -46,18 +43,18 @@ namespace Booking.Web.Controllers
             if (!User.Identity.IsAuthenticated)
             {
                 model.GymClasses =  mapper.Map<IEnumerable<GymClassesViewModel>>
-                                                     (await gymClassRepository.GetAsync());
+                                                     (await unitOfWork.GymClassRepository.GetAsync());
                
             }
 
             if (viewModel.ShowHistory)
             {
-                model.GymClasses = mapper.Map<IEnumerable<GymClassesViewModel>>(await gymClassRepository.GetHistory());
+                model.GymClasses = mapper.Map<IEnumerable<GymClassesViewModel>>(await unitOfWork.GymClassRepository.GetHistory());
             }
 
             else
             {
-                var gymclasses = await gymClassRepository.GetWithBookings();
+                var gymclasses = await unitOfWork.GymClassRepository.GetWithBookings();
                 model.GymClasses = gymclasses
                                     .Select(g => new GymClassesViewModel
                                     {
@@ -79,7 +76,7 @@ namespace Booking.Web.Controllers
         public async Task<IActionResult> GetBookings()
         {
             var userId = userManager.GetUserId(User);
-           var gymClasses = await applicationUserRepository.GetBookings(userId);
+           var gymClasses = await unitOfWork.AppUserRepository.GetBookings(userId);
             var model = new IndexViewModel
             {
 
@@ -103,7 +100,7 @@ namespace Booking.Web.Controllers
 
             var userId = userManager.GetUserId(User);
 
-            var attending = applicationUserRepository.GetAttending(id, userId);
+            var attending = unitOfWork.AppUserRepository.GetAttending(id, userId);
 
             if (attending is null)
             {
@@ -113,13 +110,13 @@ namespace Booking.Web.Controllers
                     GymClassId = (int)id
                 };
 
-                applicationUserRepository.Add(booking);
-                await db.SaveChangesAsync();
+                unitOfWork.AppUserRepository.Add(booking);
+                await unitOfWork.CompleteAsync();
             }
             else
             {
-               applicationUserRepository.Remove(attending);
-                await db.SaveChangesAsync();
+                unitOfWork.AppUserRepository.Remove(attending);
+                await unitOfWork.CompleteAsync();
             }
 
             return RedirectToAction(nameof(Index));
@@ -131,7 +128,7 @@ namespace Booking.Web.Controllers
         [RequiredIdRequiredModelFilter("id")]
         public async Task<IActionResult> Details(int? id)
         {
-            GymClass gymClass = await gymClassRepository.GetAsync(id);
+            GymClass gymClass = await unitOfWork.GymClassRepository.GetAsync(id);
 
             return View(gymClass);
         }
@@ -154,8 +151,8 @@ namespace Booking.Web.Controllers
             if (ModelState.IsValid)
             {
                 var gymClass = mapper.Map<GymClass>(viewModel);
-                gymClassRepository.Add(gymClass);
-                await db.SaveChangesAsync();
+                unitOfWork.GymClassRepository.Add(gymClass);
+                await unitOfWork.CompleteAsync();
 
                 if (Request.IsAjax())
                 {
@@ -180,7 +177,7 @@ namespace Booking.Web.Controllers
         [RequiredIdRequiredModelFilter("id")]
         public async Task<IActionResult> Edit(int? id)
         {
-            var model = mapper.Map<EditGymClassViewModel>(await gymClassRepository.GetAsync(id));
+            var model = mapper.Map<EditGymClassViewModel>(await unitOfWork.GymClassRepository.GetAsync(id));
 
             return View(model);
         }
@@ -200,8 +197,8 @@ namespace Booking.Web.Controllers
                 var gymClass = mapper.Map<GymClass>(viewModel);
                 try
                 {
-                    gymClassRepository.Update(gymClass);
-                    await db.SaveChangesAsync();
+                    unitOfWork.GymClassRepository.Update(gymClass);
+                    await unitOfWork.CompleteAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -223,7 +220,7 @@ namespace Booking.Web.Controllers
         [RequiredIdRequiredModelFilter("id")]
         public async Task<IActionResult> Delete(int? id)
         {
-            var gymClass = await gymClassRepository.GetAsync(id);
+            var gymClass = await unitOfWork.GymClassRepository.GetAsync(id);
 
             return View(gymClass);
         }
@@ -233,15 +230,15 @@ namespace Booking.Web.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var gymClass = await gymClassRepository.GetAsync(id);
-            gymClassRepository.Remove(gymClass);
-            await db.SaveChangesAsync();
+            var gymClass = await unitOfWork.GymClassRepository.GetAsync(id);
+            unitOfWork.GymClassRepository.Remove(gymClass);
+            await unitOfWork.CompleteAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool GymClassExists(int id)
         {
-            return gymClassRepository.Any(id);
+            return unitOfWork.GymClassRepository.Any(id);
         }
     }
 }

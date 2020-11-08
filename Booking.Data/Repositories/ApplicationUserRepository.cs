@@ -1,4 +1,5 @@
 ﻿using Booking.Core.Entities;
+using Booking.Core.Repositories;
 using Booking.Data.Data;
 using Booking.Data.Migrations;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Booking.Data.Repositories
 {
-    public class ApplicationUserRepository
+    public class ApplicationUserRepository : IApplicationUserRepository
     {
         private readonly ApplicationDbContext db;
 
@@ -19,13 +20,13 @@ namespace Booking.Data.Repositories
             this.db = db;
         }
 
-        public async  Task<IEnumerable<ApplicationUserGymClass>> GetBookings(string userId)
+        public async Task<IEnumerable<ApplicationUserGymClass>> GetBookings(string userId)
         {
             return await db.ApplicationUserGymClasses
                                            .IgnoreQueryFilters()
                                            .Where(u => u.ApplicationUserId == userId)
                                            .ToListAsync();
-                                        
+
         }
 
         public ApplicationUserGymClass GetAttending(int? id, string userId)
@@ -36,8 +37,8 @@ namespace Booking.Data.Repositories
         public void Add(ApplicationUserGymClass attending)
         {
             db.Add(attending);
-        } 
-        
+        }
+
         public void Remove(ApplicationUserGymClass attending)
         {
             db.Remove(attending);

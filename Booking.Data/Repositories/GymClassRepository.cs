@@ -1,4 +1,5 @@
 ﻿using Booking.Core.Entities;
+using Booking.Core.Repositories;
 using Booking.Data.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Booking.Data.Repositories
 {
-    public class GymClassRepository
+    public class GymClassRepository : IGymClassRepository
     {
         private readonly ApplicationDbContext db;
 
@@ -18,7 +19,7 @@ namespace Booking.Data.Repositories
             this.db = db;
         }
 
-        public async Task<IEnumerable<GymClass>>  GetAsync()
+        public async Task<IEnumerable<GymClass>> GetAsync()
         {
             return await db.GymClasses.ToListAsync();
         }
@@ -44,12 +45,12 @@ namespace Booking.Data.Repositories
         public void Add(GymClass gymClass)
         {
             db.Add(gymClass);
-        } 
+        }
         public void Update(GymClass gymClass)
         {
             db.Update(gymClass);
-        } 
-        
+        }
+
         public void Remove(GymClass gymClass)
         {
             db.Remove(gymClass);
