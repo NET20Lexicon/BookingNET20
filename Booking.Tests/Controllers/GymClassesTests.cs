@@ -6,11 +6,14 @@ using Booking.Data.Data;
 using Booking.Tests.Extensions;
 using Booking.Web.Controllers;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Booking.Tests.Controllers
 {
@@ -48,6 +51,45 @@ namespace Booking.Tests.Controllers
             var expected = new IndexViewModel { GymClasses = mapper.Map<IEnumerable<GymClassesViewModel>>(gymclasses) };
 
             controller.SetUserIsAuthenticated(false);
+            repository.Setup(r => r.GetAsync()).ReturnsAsync(gymclasses);
+            var vm = new IndexViewModel { ShowHistory = false };
+
+            var viewResult = controller.Index(vm).Result as ViewResult;
+
+            var actual = (IndexViewModel)viewResult.Model;
+
+            Assert.AreEqual(expected.GymClasses.Count(), actual.GymClasses.Count());
+
+        }
+
+        [TestMethod]
+        public async Task Index_ReturnsViewResult_ShouldPass()
+        {
+            controller.SetUserIsAuthenticated(true);
+            var vm = new IndexViewModel { ShowHistory = false };
+
+            var actual = await controller.Index(vm);
+
+            Assert.IsInstanceOfType(actual, typeof(ViewResult));
+        }
+
+        [TestMethod]
+        public void Crete_ReturnsDefaultView_ShouldReturnNull()
+        {
+            controller.SetAjaxRequest(false);
+            var result = controller.Create() as ViewResult;
+
+            Assert.IsNull(result.ViewName);
+        } 
+        
+        [TestMethod]
+        public void Crete_ReturnsCreatePartialWhenAjax_ShouldReturnCreatePartial()
+        {
+            const string viewName = "CreatePartial";
+            controller.SetAjaxRequest(true);
+            var result = controller.Create() as PartialViewResult;
+
+            Assert.AreEqual(result.ViewName, viewName);
         }
 
 

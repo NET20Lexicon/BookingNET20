@@ -31,6 +31,8 @@ namespace Booking.Web.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Index(IndexViewModel viewModel = null)
         {
+            if (viewModel is null) return BadRequest();
+
             var userId = UserManager.GetUserId(User);
             var model = new IndexViewModel();
 
