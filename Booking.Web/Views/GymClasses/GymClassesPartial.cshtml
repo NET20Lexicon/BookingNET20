@@ -1,35 +1,64 @@
 ﻿@model IndexViewModel
+@inject Booking.Core.Repositories.IUnitOfWork unitOfWork
 
-@foreach (var item in Model.GymClasses)
+@foreach (var gymClass in Model.GymClasses)
 {
     <tr>
         <td>
-            @if (User.IsInRole("Member"))
-            {
-                <a asp-action="Details" asp-route-id="@item.Id">@item.Name</a>
-            }
-            else
-            {
-                @Html.DisplayFor(modelItem => item.Name)
-            }
+            @*@if (User.IsInRole("Member"))
+        {
+            <a asp-action="Details" asp-route-id="@gymClass.Id">@gymClass.Name</a>
+        }
+        else
+        {
+            @Html.DisplayFor(modelItem => gymClass.Name)
+        }*@
+
+            <p>
+                @Html.DisplayFor(modelItem => gymClass.Name)
+                @if (User.IsInRole("Member"))
+                {
+
+                    <a data-toggle="collapse" href="#memberlist-@gymClass.Id" role="button" aria-expanded="false">
+                        <i class="fa fa-plus"></i>
+                    </a>
+                }
+            </p>
+
+            <div class="collapse" id="memberlist-@gymClass.Id">
+                @if (User.IsInRole("Member"))
+                {
+                    @foreach (var member in await unitOfWork.AppUserRepository.GetBookedMemberNamesAsync(gymClass.Id))
+                    {
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h4 class="card-title">@member</h4>
+                                <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor</p>
+                                <a href="#" class="btn btn-primary btn-sm"><i class="fa fa-info"></i></a>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+
 
         </td>
         <td>
-            @Html.DisplayFor(modelItem => item.StartDate)
+            @Html.DisplayFor(modelItem => gymClass.StartDate)
         </td>
         <td>
-            @Html.DisplayFor(modelItem => item.Duration)
+            @Html.DisplayFor(modelItem => gymClass.Duration)
         </td>
         @if (User.IsInRole("Member"))
         {
             <td>
-                <a asp-action="BookingToggle" asp-route-id="@item.Id"
-                   class="btn @(item.Attending ? "btn-danger" : "btn-success")">
-                    @(item.Attending ? "cancel" : "book")
+                <a asp-action="BookingToggle" asp-route-id="@gymClass.Id"
+                   class="btn @(gymClass.Attending ? "btn-danger" : "btn-success")">
+                    @(gymClass.Attending ? "cancel" : "book")
                 </a> |
 
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                <a asp-action="Edit" asp-route-id="@gymClass.Id">Edit</a> |
+                <a asp-action="Delete" asp-route-id="@gymClass.Id">Delete</a>
             </td>
         }
     </tr>

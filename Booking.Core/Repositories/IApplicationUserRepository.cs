@@ -10,5 +10,6 @@ namespace Booking.Core.Repositories
         ApplicationUserGymClass GetAttending(int? id, string userId);
         Task<IEnumerable<ApplicationUserGymClass>> GetBookingsAsync(string userId);
         void Remove(ApplicationUserGymClass attending);
+        Task<IEnumerable<string>> GetBookedMemberNamesAsync(int gymClassId);
     }
 }

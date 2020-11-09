@@ -44,5 +44,15 @@ namespace Booking.Data.Repositories
         {
             db.Remove(attending);
         }
+
+        public async Task<IEnumerable<string>> GetBookedMemberNamesAsync(int gymClassId)
+        {
+
+            return await db.ApplicationUserGymClasses
+                                     .Include(g => g.ApplicationUser)
+                                     .Where(g => g.GymClassId == gymClassId)
+                                     .Select(a => a.ApplicationUser.FullName)
+                                     .ToListAsync();
+        }
     }
 }
