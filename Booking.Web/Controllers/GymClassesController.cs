@@ -48,6 +48,13 @@ namespace Booking.Web.Controllers
 
             else
             {
+                //var gymClasses = await UnitOfWork.GymClassRepository.GetWithBookingsAsync();
+                //model.GymClasses = Mapper.Map<IEnumerable<GymClassesViewModel>>(gymClasses, opt => opt.Items.Add("Id", userId));
+                //model = Mapper.Map<IndexViewModel>(gymClasses, opt => opt.Items.Add("Id", userId));
+
+
+
+                //Old
                 var gymclasses = await UnitOfWork.GymClassRepository.GetWithBookingsAsync();
                 model.GymClasses = gymclasses
                                     .Select(g => new GymClassesViewModel
@@ -57,7 +64,7 @@ namespace Booking.Web.Controllers
                                         Duration = g.Duration,
                                         Attending = g.AttendedMembers.Any(m => m.ApplicationUserId == userId)
                                     });
-                                  
+
             }
 
             return View(model);
