@@ -70,7 +70,8 @@ namespace Booking.Web.Controllers
             return View(model);
         }
 
-      
+        
+
         public IActionResult Fetch()
         {
             return PartialView("CreatePartial");

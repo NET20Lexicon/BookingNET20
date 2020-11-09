@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using Booking.Core.Entities;
 using Booking.Core.Repositories;
+using Booking.Core.ViewModels;
 using Booking.Data.Data;
+using Booking.Tests.Extensions;
 using Booking.Web.Controllers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -37,6 +39,15 @@ namespace Booking.Tests.Controllers
             var mockUserManager = new Mock<UserManager<ApplicationUser>>(userStore.Object, null, null, null, null, null, null, null, null);
 
             controller = new GymClassesController(mockUoW.Object, mockUserManager.Object, mapper);
+        }
+
+        [TestMethod]
+        public void Index_NotAutenthicated_ReturnsExpected()
+        {
+            var gymclasses = GetGymClassList();
+            var expected = new IndexViewModel { GymClasses = mapper.Map<IEnumerable<GymClassesViewModel>>(gymclasses) };
+
+            controller.SetUserIsAuthenticated(false);
         }
 
 
