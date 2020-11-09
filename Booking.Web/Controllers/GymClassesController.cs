@@ -46,7 +46,7 @@ namespace Booking.Web.Controllers
                 model.GymClasses = Mapper.Map<IEnumerable<GymClassesViewModel>>(await UnitOfWork.GymClassRepository.GetHistoryAsync());
             }
 
-            else
+            if(User.Identity.IsAuthenticated && !viewModel.ShowHistory)
             {
                 //var gymClasses = await UnitOfWork.GymClassRepository.GetWithBookingsAsync();
                 //model.GymClasses = Mapper.Map<IEnumerable<GymClassesViewModel>>(gymClasses, opt => opt.Items.Add("Id", userId));
