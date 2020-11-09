@@ -30,14 +30,14 @@ namespace Booking.Data.Repositories
                 .FirstOrDefaultAsync(m => m.Id == id);
         }
 
-        public async Task<IEnumerable<GymClass>> GetHistory()
+        public async Task<IEnumerable<GymClass>> GetHistoryAsync()
         {
             return await db.GymClasses
                         .IgnoreQueryFilters()
                         .Where(g => g.StartDate < DateTime.Now).ToListAsync();
         }
 
-        public async Task<IEnumerable<GymClass>> GetWithBookings()
+        public async Task<IEnumerable<GymClass>> GetWithBookingsAsync()
         {
             return await db.GymClasses.Include(g => g.AttendedMembers).ToListAsync();
         }

@@ -10,8 +10,8 @@ namespace Booking.Core.Repositories
         bool Any(int id);
         Task<IEnumerable<GymClass>> GetAsync();
         Task<GymClass> GetAsync(int? id);
-        Task<IEnumerable<GymClass>> GetHistory();
-        Task<IEnumerable<GymClass>> GetWithBookings();
+        Task<IEnumerable<GymClass>> GetHistoryAsync();
+        Task<IEnumerable<GymClass>> GetWithBookingsAsync();
         void Remove(GymClass gymClass);
         void Update(GymClass gymClass);
     }

@@ -8,7 +8,7 @@ namespace Booking.Core.Repositories
     {
         void Add(ApplicationUserGymClass attending);
         ApplicationUserGymClass GetAttending(int? id, string userId);
-        Task<IEnumerable<ApplicationUserGymClass>> GetBookings(string userId);
+        Task<IEnumerable<ApplicationUserGymClass>> GetBookingsAsync(string userId);
         void Remove(ApplicationUserGymClass attending);
     }
 }

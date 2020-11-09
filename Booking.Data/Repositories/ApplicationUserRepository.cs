@@ -20,9 +20,10 @@ namespace Booking.Data.Repositories
             this.db = db;
         }
 
-        public async Task<IEnumerable<ApplicationUserGymClass>> GetBookings(string userId)
+        public async Task<IEnumerable<ApplicationUserGymClass>> GetBookingsAsync(string userId)
         {
             return await db.ApplicationUserGymClasses
+                                           .Include(g => g.GymClass)
                                            .IgnoreQueryFilters()
                                            .Where(u => u.ApplicationUserId == userId)
                                            .ToListAsync();
