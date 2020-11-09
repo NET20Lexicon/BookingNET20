@@ -64,7 +64,10 @@ namespace Booking.Web.Controllers
         }
 
       
-
+        public IActionResult Fetch()
+        {
+            return PartialView("CreatePartial");
+        }
 
 
         public async Task<IActionResult> GetBookings()

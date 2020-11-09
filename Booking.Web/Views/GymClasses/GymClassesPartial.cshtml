@@ -28,11 +28,11 @@
             <div class="collapse" id="memberlist-@gymClass.Id">
                 @if (User.IsInRole("Member"))
                 {
-                    @foreach (var member in await unitOfWork.AppUserRepository.GetBookedMemberNamesAsync(gymClass.Id))
+                    @foreach (var name in await unitOfWork.AppUserRepository.GetBookedMemberNamesAsync(gymClass.Id))
                     {
                         <div class="card">
                             <div class="card-body text-center">
-                                <h4 class="card-title">@member</h4>
+                                <h4 class="card-title">@name</h4>
                                 <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor</p>
                                 <a href="#" class="btn btn-primary btn-sm"><i class="fa fa-info"></i></a>
                             </div>
